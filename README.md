@@ -15,7 +15,7 @@ Les mesures de charge ont été faites avec Locust en mode headless sur l'endpoi
 
 ### Démarche de mesure
 
-L'application a été déployée sur Google App Engine à l'URL indiquée plus haut, sans modifier le code de base du projet. Les mesures ont ensuite été faites depuis la machine locale avec Locust, en appelant uniquement l'endpoint JSON `GET /api/timeline?user=userX&limit=20`.
+L'application a été déployée sur Google App Engine à l'URL indiquée plus haut. Les mesures ont ensuite été faites depuis la machine locale avec Locust, en appelant uniquement l'endpoint JSON `GET /api/timeline?user=userX&limit=20`.
 
 Pour chaque expérience, la base Datastore a été remise dans un état propre avec `clear_datastore.py`, qui supprime toutes les entités `Post` et `User`. Le dataset correspondant au paramètre testé a ensuite été régénéré: 1000 utilisateurs, un nombre fixe de posts par utilisateur, et un nombre de followees selon l'expérience. Cela évite qu'un test réutilise les données du test précédent.
 
@@ -113,7 +113,7 @@ Conclusion pour le fanout: l'infrastructure essaie de scaler, mais l'architectur
 
 #### Conclusion générale
 
-La réponse est donc nuancée. Sur le plan infrastructure, ça scale: Google App Engine joue bien son rôle de PaaS en ajoutant automatiquement des instances, et les benchmarks ne montrent pas d'échecs Locust. Sur le plan applicatif et données, ça scale beaucoup moins bien: TinyInsta calcule les timelines à la lecture avec une approche de type pull, dont le coût augmente avec le nombre d'utilisateurs suivis.
+La réponse est donc nuancée. Sur le plan infrastructure, ça scale: Google App Engine joue bien son rôle en ajoutant automatiquement des instances, et les benchmarks ne montrent pas d'échecs Locust. Sur le plan applicatif et données, ça scale beaucoup moins bien: TinyInsta calcule les timelines à la lecture avec une approche de type pull, dont le coût augmente avec le nombre d'utilisateurs suivis.
 
 Pour rendre TinyInsta plus scalable, il faudrait éviter de reconstruire toute la timeline à chaque lecture. Une solution classique serait de pré-calculer les timelines, par exemple avec une approche fanout-on-write: quand un utilisateur publie un post, le système pousse ce post dans une timeline pré-calculée pour ses followers. La lecture devient alors beaucoup plus rapide, car elle consiste surtout à lire une liste déjà préparée au lieu de faire une grosse requête `IN` à chaque consultation.
 
