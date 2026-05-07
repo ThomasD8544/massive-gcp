@@ -15,7 +15,7 @@ Les mesures de charge ont été faites avec Locust en mode headless sur l'endpoi
 
 ### Démarche de mesure
 
-L'application a été déployée sur Google App Engine à l'URL indiquée plus haut. Les mesures ont ensuite été faites depuis la machine locale avec Locust, en appelant uniquement l'endpoint JSON `GET /api/timeline?user=userX&limit=20`.
+L'application a été déployée sur Google App Engine à l'URL indiquée plus haut. Les mesures ont ensuite été faites depuis la machine locale avec Locust.
 
 Pour chaque expérience, la base Datastore a été remise dans un état propre avec `clear_datastore.py`, qui supprime toutes les entités `Post` et `User`. Le dataset correspondant au paramètre testé a ensuite été régénéré: 1000 utilisateurs, un nombre fixe de posts par utilisateur, et un nombre de followees selon l'expérience. Cela évite qu'un test réutilise les données du test précédent.
 
@@ -95,7 +95,7 @@ Détails des runs:
 
 #### Charge concurrente
 
-Les résultats sont cohérents avec le comportement attendu d'une application déployée sur un PaaS autoscale comme Google App Engine. Quand la concurrence augmente de 1 à 100 utilisateurs simultanés, le temps moyen passe d'environ 78 ms à environ 622 ms. La latence augmente donc, mais elle reste inférieure à une seconde, et aucun run ne produit d'échec Locust. En parallèle, App Engine ajoute automatiquement des instances pour absorber la charge: on observe par exemple jusqu'à 12 instances sur les runs à 50 et 100 utilisateurs simultanés.
+Les résultats sont cohérents avec le comportement attendu d'une application déployée sur un gCloud autoscale comme Google App Engine. Quand la concurrence augmente de 1 à 100 utilisateurs simultanés, le temps moyen passe d'environ 78 ms à environ 622 ms. La latence augmente donc, mais elle reste inférieure à une seconde, et aucun run ne produit d'échec Locust. En parallèle, App Engine ajoute automatiquement des instances pour absorber la charge: on observe par exemple jusqu'à 12 instances sur les runs à 50 et 100 utilisateurs simultanés.
 
 À 1000 utilisateurs simultanés, la latence augmente beaucoup plus fortement, avec un temps moyen d'environ 2,28 secondes. Cela s'explique par la saturation progressive de l'application et par le temps nécessaire à l'autoscaling pour allumer davantage d'instances. Le nombre d'instances monte jusqu'à 20, mais les requêtes peuvent être mises en attente pendant que ces instances deviennent disponibles. Locust a aussi signalé une utilisation CPU locale élevée sur ces gros runs, donc la machine qui injecte la charge peut influencer cette mesure. Le point important est que `FAILED` reste à 0: l'application ralentit, mais elle ne rejette pas les requêtes pendant ces tests.
 
